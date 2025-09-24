@@ -8,21 +8,39 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .hidden { display: none; }
-        .nav-item:hover { background-color: #4f46e5; }
+        .nav-item:hover { background-color: #4f46e5; transition: background-color 0.3s ease; }
         .active-link { background-color: #2563eb; }
-        .hero { background: linear-gradient(135deg, #6366f1, #9333ea); color: white; padding: 50px; border-radius: 20px; text-align: center; }
-        .hero-user { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; padding: 50px; border-radius: 20px; text-align: center; }
+        .hero { background: linear-gradient(135deg, #6366f1, #9333ea); color: white; padding: 50px; border-radius: 20px; text-align: center; animation: fadeIn 0.5s ease-in; }
+        .hero-user { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; padding: 50px; border-radius: 20px; text-align: center; animation: fadeIn 0.5s ease-in; }
+        .card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card:hover { transform: translateY(-5px); box naturales
+        .toast { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; border-radius: 5px; color: white; z-index: 1000; animation: slideIn 0.5s ease, slideOut 0.5s ease 2s forwards; }
+        .toast-success { background-color: #10b981; }
+        .toast-error { background-color: #ef4444; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
+        .dark-mode { background-color: #1f2937; color: #e5e7eb; }
+        .dark-mode .bg-white { background-color: #374151; }
+        .dark-mode .bg-gray-100 { background-color: #111827; }
+        .dark-mode .bg-gray-200 { background-color: #4b5563; }
+        .dark-mode .text-gray-900 { color: #e5e7eb; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans transition-colors duration-300">
     <div id="app" class="min-h-screen flex flex-col">
         <!-- LOGIN PAGE -->
         <div id="loginPage" class="flex justify-center items-center h-screen">
-            <div class="w-full max-w-md p-8 bg-white rounded shadow-md">
-                <h2 class="text-2xl font-bold mb-6 text-center">Library Login</h2>
-                <input id="username" type="text" placeholder="Username" class="w-full p-2 mb-4 border rounded">
-                <input id="password" type="password" placeholder="Password" class="w-full p-2 mb-4 border rounded">
-                <button onclick="login()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Login</button>
+            <div class="w-full max-w-md p-8 bg-white rounded-lg shadow-lg animate-fadeIn">
+                <h2 class="text-2xl font-bold mb-6 text-center text-gray-900">Library Login</h2>
+                <input id="username" type="text" placeholder="Username" class="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input id="password" type="password" placeholder="Password" class="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="login()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors duration-200 flex justify-center items-center">
+                    <span id="loginBtnText">Login</span>
+                    <span id="loginSpinner" class="spinner hidden ml-2"></span>
+                </button>
                 <p id="loginError" class="text-red-500 mt-2 text-center hidden">Invalid credentials!</p>
             </div>
         </div>
@@ -30,9 +48,14 @@
         <!-- DASHBOARD -->
         <div id="dashboard" class="hidden flex flex-col min-h-screen">
             <!-- NAVBAR -->
-            <nav class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center flex-wrap">
+            <nav class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center flex-wrap shadow-md">
                 <div class="text-xl font-bold">Library System</div>
-                <div id="navLinks" class="flex gap-2 flex-wrap"></div>
+                <div class="flex gap-2 items-center flex-wrap">
+                    <div id="navLinks" class="flex gap-2 flex-wrap"></div>
+                    <button onclick="toggleDarkMode()" class="p-2 rounded hover:bg-indigo-500 transition-colors duration-200">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
             </nav>
 
             <!-- MAIN CONTENT -->
@@ -42,93 +65,84 @@
                     <h1 class="text-3xl font-bold mb-4">Welcome Admin</h1>
                     <p class="mb-4">Manage books, members, transactions, and generate reports from here.</p>
                     <div class="flex justify-center gap-4 mb-4">
-                        <button onclick="showSection('bookSection')" class="bg-white text-indigo-600 px-4 py-2 rounded shadow hover:bg-gray-100">Manage Books</button>
-                        <button onclick="showSection('reportSection')" class="bg-white text-indigo-600 px-4 py-2 rounded shadow hover:bg-gray-100">View Reports</button>
+                        <button onclick="showSection('bookSection')" class="bg-white text-indigo-600 px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors duration-200">Manage Books</button>
+                        <button onclick="showSection('reportSection')" class="bg-white text-indigo-600 px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors duration-200">View Reports</button>
                     </div>
                     <div class="flex justify-center gap-4 text-2xl">
-                        <i class="fab fa-facebook hover:text-gray-200 cursor-pointer"></i>
-                        <i class="fab fa-twitter hover:text-gray-200 cursor-pointer"></i>
-                        <i class="fab fa-linkedin hover:text-gray-200 cursor-pointer"></i>
+                        <i class="fab fa-facebook hover:text-gray-200 cursor-pointer transition-colors duration-200"></i>
+                        <i class="fab fa-twitter hover:text-gray-200 cursor-pointer transition-colors duration-200"></i>
+                        <i class="fab fa-linkedin hover:text-gray-200 cursor-pointer transition-colors duration-200"></i>
                     </div>
                 </div>
 
                 <!-- USER HOME -->
                 <div id="userHome" class="hidden hero-user">
                     <h1 class="text-3xl font-bold mb-4">Welcome User</h1>
-                    <p class="mb-4">Search books, issue or return items, and pay fines easily from here.</p>
+                    <p class="mb-4">Search books, issue or return items, and manage your profile from here.</p>
                     <div class="flex justify-center gap-4 mb-4">
-                        <button onclick="showSection('bookSection')" class="bg-white text-blue-600 px-4 py-2 rounded shadow hover:bg-gray-100">Search Books</button>
-                        <button onclick="showSection('transactionSection')" class="bg-white text-blue-600 px-4 py-2 rounded shadow hover:bg-gray-100">My Transactions</button>
+                        <button onclick="showSection('bookSection')" class="bg-white text-blue-600 px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors duration-200">Search Books</button>
+                        <button onclick="showSection('transactionSection')" class="bg-white text-blue-600 px-4 py-2 rounded shadow hover:bg-gray-100 transition-colors duration-200">My Transactions</button>
                     </div>
                     <div class="flex justify-center gap-4 text-2xl">
-                        <i class="fab fa-instagram hover:text-gray-200 cursor-pointer"></i>
-                        <i class="fab fa-whatsapp hover:text-gray-200 cursor-pointer"></i>
-                        <i class="fab fa-github hover:text-gray-200 cursor-pointer"></i>
+                        <i class="fab fa-instagram hover:text-gray-200 cursor-pointer transition-colors duration-200"></i>
+                        <i class="fab fa-whatsapp hover:text-gray-200 cursor-pointer transition-colors duration-200"></i>
+                        <i class="fab fa-github hover:text-gray-200 cursor-pointer transition-colors duration-200"></i>
                     </div>
                 </div>
 
                 <!-- BOOKS -->
-                <div id="bookSection" class="hidden bg-white p-5 rounded shadow mt-4">
-                    <h3 class="text-xl font-bold mb-4">Books & Movies</h3>
-                    <div id="adminBookForm" class="mb-4">
-                        <input id="bookName" type="text" placeholder="Book/Movie Name" class="border p-2 rounded mr-2 mb-2">
-                        <input id="bookAuthor" type="text" placeholder="Author/Director" class="border p-2 rounded mr-2 mb-2">
-                        <select id="bookType" class="border p-2 rounded mr-2 mb-2">
+                <div id="bookSection" class="hidden bg-white p-5 rounded-lg shadow-lg mt-4 animate-fadeIn">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900">Books & Movies</h3>
+                    <div class="mb-4">
+                        <input id="bookSearch" type="text" placeholder="Search Books/Movies..." class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="searchBooks()">
+                    </div>
+                    <div id="adminBookForm" class="mb-4 flex flex-wrap gap-2">
+                        <input id="bookName" type="text" placeholder="Book/Movie Name" class="border p-2 rounded flex-1 min-w-[150px]">
+                        <input id="bookAuthor" type="text" placeholder="Author/Director" class="border p-2 rounded flex-1 min-w-[150px]">
+                        <select id="bookType" class="border p-2 rounded min-w-[100px]">
                             <option value="book">Book</option>
                             <option value="movie">Movie</option>
                         </select>
-                        <button onclick="addBook()" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Add</button>
+                        <button onclick="addBook()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-200 flex items-center">
+                            <span>Add</span>
+                            <span id="addBookSpinner" class="spinner hidden ml-2"></span>
+                        </button>
                     </div>
-                    <table class="table-auto w-full mt-4 border-collapse border border-gray-300">
-                        <thead>
-                            <tr class="bg-gray-200">
-                                <th class="border px-2 py-1">Name</th>
-                                <th class="border px-2 py-1">Author/Director</th>
-                                <th class="border px-2 py-1">Type</th>
-                                <th class="border px-2 py-1">Status</th>
-                                <th class="border px-2 py-1">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bookList"></tbody>
-                    </table>
+                    <div id="bookList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
                 <!-- MEMBERS -->
-                <div id="memberSection" class="hidden bg-white p-5 rounded shadow mt-4">
-                    <h3 class="text-xl font-bold mb-4">Manage Members</h3>
-                    <div id="adminMemberForm" class="mb-4">
-                        <input id="memberName" type="text" placeholder="Member Name" class="border p-2 rounded mr-2 mb-2">
-                        <input id="memberUsername" type="text" placeholder="Username" class="border p-2 rounded mr-2 mb-2">
-                        <button onclick="addMember()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Add Member</button>
+                <div id="memberSection" class="hidden bg-white p-5 rounded-lg shadow-lg mt-4 animate-fadeIn">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900">Manage Members</h3>
+                    <div id="adminMemberForm" class="mb-4 flex flex-wrap gap-2">
+                        <input id="memberName" type="text" placeholder="Member Name" class="border p-2 rounded flex-1 min-w-[150px]">
+                        <input id="memberUsername" type="text" placeholder="Username" class="border p-2 rounded flex-1 min-w-[150px]">
+                        <button onclick="addMember()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors duration-200 flex items-center">
+                            <span>Add Member</span>
+                            <span id="addMemberSpinner" class="spinner hidden ml-2"></span>
+                        </button>
                     </div>
-                    <table class="table-auto w-full mt-4 border-collapse border border-gray-300">
-                        <thead>
-                            <tr class="bg-gray-200">
-                                <th class="border px-2 py-1">Name</th>
-                                <th class="border px-2 py-1">Username</th>
-                                <th class="border px-2 py-1">Status</th>
-                                <th class="border px-2 py-1">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="memberList"></tbody>
-                    </table>
+                    <div id="memberList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
 
                 <!-- TRANSACTIONS -->
-                <div id="transactionSection" class="hidden bg-white p-5 rounded shadow mt-4">
-                    <h3 class="text-xl font-bold mb-4">Transactions</h3>
-                    <div id="adminTranForm" class="mb-4 flex gap-2 flex-wrap">
-                        <select id="tranMember" class="border p-2 rounded mr-2 mb-2"></select>
-                        <select id="tranBook" class="border p-2 rounded mr-2 mb-2"></select>
-                        <button onclick="issueBook()" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Issue</button>
+                <div id="transactionSection" class="hidden bg-white p-5 rounded-lg shadow-lg mt-4 animate-fadeIn">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900">Transactions</h3>
+                    <div id="adminTranForm" class="mb-4 flex flex-wrap gap-2">
+                        <select id="tranMember" class="border p-2 rounded flex-1 min-w-[150px]"></select>
+                        <select id="tranBook" class="border p-2 rounded flex-1 min-w-[150px]"></select>
+                        <button onclick="issueBook()" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors duration-200 flex items-center">
+                            <span>Issue</span>
+                            <span id="issueSpinner" class="spinner hidden ml-2"></span>
+                        </button>
                     </div>
                     <table class="table-auto w-full mt-4 border-collapse border border-gray-300">
                         <thead>
                             <tr class="bg-gray-200">
-                                <th class="border px-2 py-1">Member</th>
-                                <th class="border px-2 py-1">Item</th>
-                                <th class="border px-2 py-1">Status</th>
-                                <th class="border px-2 py-1">Action</th>
+                                <th class="border px-2 py-1 text-gray-900">Member</th>
+                                <th class="border px-2 py-1 text-gray-900">Item</th>
+                                <th class="border px-2 py-1 text-gray-900">Status</th>
+                                <th class="border px-2 py-1 text-gray-900">Action</th>
                             </tr>
                         </thead>
                         <tbody id="tranList"></tbody>
@@ -136,21 +150,45 @@
                 </div>
 
                 <!-- REPORTS -->
-                <div id="reportSection" class="hidden bg-white p-5 rounded shadow mt-4">
-                    <h3 class="text-xl font-bold mb-4">Reports</h3>
-                    <ul>
-                        <li>Total Books/Movies: <span id="totalBooks">0</span></li>
-                        <li>Total Members: <span id="totalMembers">0</span></li>
-                        <li>Issued Items: <span id="totalIssued">0</span></li>
-                        <li>Overdue Items: <span id="totalOverdue">0</span></li>
+                <div id="reportSection" class="hidden bg-white p-5 rounded-lg shadow-lg mt-4 animate-fadeIn">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900">Reports</h3>
+                    <ul class="space-y-2">
+                        <li class="text-gray-900">Total Books/Movies: <span id="totalBooks" class="font-semibold">0</span></li>
+                        <li class="text-gray-900">Total Members: <span id="totalMembers" class="font-semibold">0</span></li>
+                        <li class="text-gray-900">Issued Items: <span id="totalIssued" class="font-semibold">0</span></li>
+                        <li class="text-gray-900">Overdue Items: <span id="totalOverdue" class="font-semibold">0</span></li>
                     </ul>
                 </div>
 
+                <!-- USER PROFILE -->
+                <div id="profileSection" class="hidden bg-white p-5 rounded-lg shadow-lg mt-4 animate-fadeIn">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900">User Profile</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-900">Username</label>
+                            <input id="profileUsername" type="text" class="w-full p-2 border rounded bg-gray-100" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-gray-900">Name</label>
+                            <input id="profileName" type="text" class="w-full p-2 border rounded">
+                        </div>
+                        <button onclick="updateProfile()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-200 flex items-center">
+                            <span>Update Profile</span>
+                            <span id="profileSpinner" class="spinner hidden ml-2"></span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- PAY FINE -->
-                <div id="payFineSection" class="hidden bg-white p-5 rounded shadow mt-4">
-                    <h3 class="text-xl font-bold mb-4">Pay Fine</h3>
-                    <input type="number" placeholder="Enter fine amount" id="fineAmount" class="border p-2 rounded mr-2">
-                    <button onclick="payFine()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Pay</button>
+                <div id="payFineSection" class="hidden bg-white p-5 rounded-lg shadow-lg mt-4 animate-fadeIn">
+                    <h3 class="text-xl font-bold mb-4 text-gray-900">Pay Fine</h3>
+                    <div class="flex gap-2">
+                        <input type="number" placeholder="Enter fine amount" id="fineAmount" class="border p-2 rounded flex-1">
+                        <button onclick="payFine()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors duration-200 flex items-center">
+                            <span>Pay</span>
+                            <span id="fineSpinner" class="spinner hidden ml-2"></span>
+                        </button>
+                    </div>
                     <p id="fineMsg" class="mt-3 text-green-600 hidden">Fine Paid Successfully ✅</p>
                 </div>
             </div>
@@ -159,8 +197,8 @@
         <script>
             // USERS
             let users = [
-                { username: "admin", password: "admin123", role: "admin" },
-                { username: "user1", password: "user123", role: "user" }
+                { username: "admin", password: "admin123", role: "admin", name: "Admin User" },
+                { username: "user1", password: "user123", role: "user", name: "John Doe" }
             ];
             let currentUser = null;
 
@@ -194,7 +232,7 @@
             const adminNav = [
                 { name: "Home", section: "adminHome" },
                 { name: "Books", section: "bookSection" },
-                { name: "Membership", section: "memberSection" },
+                { name: "Members", section: "memberSection" },
                 { name: "Transactions", section: "transactionSection" },
                 { name: "Reports", section: "reportSection" },
                 { name: "Logout", action: "logout" }
@@ -203,12 +241,27 @@
                 { name: "Home", section: "userHome" },
                 { name: "Books", section: "bookSection" },
                 { name: "Transactions", section: "transactionSection" },
+                { name: "Profile", section: "profileSection" },
                 { name: "Pay Fine", section: "payFineSection" },
                 { name: "Logout", action: "logout" }
             ];
 
+            // UTILITY: SHOW TOAST
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.innerText = message;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
             // LOGIN
-            function login() {
+            async function login() {
+                const btnText = document.getElementById("loginBtnText");
+                const spinner = document.getElementById("loginSpinner");
+                btnText.classList.add("hidden");
+                spinner.classList.remove("hidden");
+                await new Promise(resolve => setTimeout(resolve, 500)); // Simulate async
                 const u = document.getElementById("username").value.trim();
                 const p = document.getElementById("password").value.trim();
                 let user = users.find(x => x.username === u && x.password === p);
@@ -220,9 +273,13 @@
                     setupNavbar();
                     refresh();
                     showSection(user.role === "admin" ? "adminHome" : "userHome");
+                    showToast("Login successful!", "success");
                 } else {
                     document.getElementById("loginError").classList.remove("hidden");
+                    showToast("Invalid credentials!", "error");
                 }
+                btnText.classList.remove("hidden");
+                spinner.classList.add("hidden");
             }
 
             // LOGOUT
@@ -233,7 +290,17 @@
                     document.getElementById("loginPage").classList.remove("hidden");
                     document.getElementById("username").value = "";
                     document.getElementById("password").value = "";
+                    showToast("Logged out successfully!", "success");
+                    document.body.classList.remove("dark-mode");
                 }
+            }
+
+            // DARK MODE TOGGLE
+            function toggleDarkMode() {
+                document.body.classList.toggle("dark-mode");
+                const icon = document.querySelector("nav .fa-moon");
+                icon.classList.toggle("fa-sun");
+                icon.classList.toggle("fa-moon");
             }
 
             // NAVBAR SETUP
@@ -243,27 +310,60 @@
                 const navItems = currentUser.role === "admin" ? adminNav : userNav;
                 navItems.forEach(item => {
                     const span = document.createElement("span");
-                    span.className = "nav-item px-3 py-1 rounded cursor-pointer";
+                    span.className = "nav-item px-3 py-1 rounded cursor-pointer text-white transition-colors duration-200";
                     span.innerText = item.name;
                     if (item.action === "logout") span.onclick = logout;
-                    else span.onclick = () => showSection(item.section);
+                    else span.onclick = () => { showSection(item.section); setActiveNav(item.name); };
                     nav.appendChild(span);
                 });
-                // Hide admin-only forms if user
-                document.getElementById("adminBookForm").style.display = currentUser.role === "admin" ? "block" : "none";
-                document.getElementById("adminMemberForm").style.display = currentUser.role === "admin" ? "block" : "none";
-                document.getElementById("adminTranForm").style.display = currentUser.role === "admin" ? "block" : "none";
+                document.getElementById("adminBookForm").style.display = currentUser.role === "admin" ? "flex" : "none";
+                document.getElementById("adminMemberForm").style.display = currentUser.role === "admin" ? "flex" : "none";
+                document.getElementById("adminTranForm").style.display = currentUser.role === "admin" ? "flex" : "none";
+            }
+
+            // SET ACTIVE NAV
+            function setActiveNav(name) {
+                document.querySelectorAll(".nav-item").forEach(item => {
+                    item.classList.remove("active-link");
+                    if (item.innerText === name) item.classList.add("active-link");
+                });
             }
 
             // SHOW SECTION
             function showSection(id) {
-                const sections = ["adminHome", "userHome", "bookSection", "memberSection", "transactionSection", "reportSection", "payFineSection"];
+                const sections = ["adminHome", "userHome", "bookSection", "memberSection", "transactionSection", "reportSection", "profileSection", "payFineSection"];
                 sections.forEach(s => document.getElementById(s).classList.add("hidden"));
                 document.getElementById(id).classList.remove("hidden");
             }
 
+            // SEARCH BOOKS
+            function searchBooks() {
+                const query = document.getElementById("bookSearch").value.trim().toLowerCase();
+                const filtered = items.filter(b => b.name.toLowerCase().includes(query) || b.author.toLowerCase().includes(query));
+                renderBooks(filtered);
+            }
+
+            // RENDER BOOKS
+            function renderBooks(bookList = items) {
+                document.getElementById("bookList").innerHTML = bookList.map((b, i) => `
+                    <div class="card bg-gray-50 p-4 rounded-lg shadow-md">
+                        <h4 class="text-lg font-semibold text-gray-900">${b.name}</h4>
+                        <p class="text-gray-600">By ${b.author}</p>
+                        <p class="text-gray-600">Type: ${b.type}</p>
+                        <p class="text-${b.status === 'available' ? 'green' : 'red'}-600">Status: ${b.status}</p>
+                        ${currentUser.role === "admin" && b.status === "available" ? 
+                            `<button onclick="deleteItem(${i})" class="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors duration-200">Delete</button>` : ""}
+                    </div>
+                `).join("");
+            }
+
             // BOOKS
-            function addBook() {
+            async function addBook() {
+                const btnText = document.getElementById("addBookSpinner").previousElementSibling;
+                const spinner = document.getElementById("addBookSpinner");
+                btnText.classList.add("hidden");
+                spinner.classList.remove("hidden");
+                await new Promise(resolve => setTimeout(resolve, 500)); // Simulate async
                 const name = document.getElementById("bookName").value.trim();
                 const author = document.getElementById("bookAuthor").value.trim();
                 const type = document.getElementById("bookType").value;
@@ -272,38 +372,73 @@
                     document.getElementById("bookName").value = "";
                     document.getElementById("bookAuthor").value = "";
                     refresh();
+                    showToast("Book added successfully!", "success");
+                } else {
+                    showToast("Please fill all fields!", "error");
                 }
+                btnText.classList.remove("hidden");
+                spinner.classList.add("hidden");
             }
 
             function deleteItem(i) {
                 if (confirm("Delete this item?")) {
                     items.splice(i, 1);
                     refresh();
+                    showToast("Item deleted!", "success");
                 }
             }
 
             // MEMBERS
-            function addMember() {
+            async function addMember() {
+                const btnText = document.getElementById("addMemberSpinner").previousElementSibling;
+                const spinner = document.getElementById("addMemberSpinner");
+                btnText.classList.add("hidden");
+                spinner.classList.remove("hidden");
+                await new Promise(resolve => setTimeout(resolve, 500)); // Simulate async
                 const name = document.getElementById("memberName").value.trim();
                 const username = document.getElementById("memberUsername").value.trim();
-                if (name && username) {
+                if (name && username && !users.find(u => u.username === username)) {
                     members.push({ name, username, status: "active" });
-                    users.push({ username, password: "12345", role: "user" });
+                    users.push({ username, password: "12345", role: "user", name });
                     document.getElementById("memberName").value = "";
                     document.getElementById("memberUsername").value = "";
                     refresh();
+                    showToast("Member added successfully!", "success");
+                } else {
+                    showToast("Username already exists or fields are empty!", "error");
                 }
+                btnText.classList.remove("hidden");
+                spinner.classList.add("hidden");
             }
 
             function cancelMember(i) {
                 if (confirm("Cancel membership?")) {
                     members[i].status = "inactive";
                     refresh();
+                    showToast("Membership cancelled!", "success");
                 }
             }
 
+            // RENDER MEMBERS
+            function renderMembers() {
+                document.getElementById("memberList").innerHTML = members.map((m, i) => `
+                    <div class="card bg-gray-50 p-4 rounded-lg shadow-md">
+                        <h4 class="text-lg font-semibold text-gray-900">${m.name}</h4>
+                        <p class="text-gray-600">Username: ${m.username}</p>
+                        <p class="text-${m.status === 'active' ? 'green' : 'red'}-600">Status: ${m.status}</p>
+                        ${currentUser.role === "admin" ? 
+                            `<button onclick="cancelMember(${i})" class="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors duration-200">Cancel</button>` : ""}
+                    </div>
+                `).join("");
+            }
+
             // TRANSACTIONS
-            function issueBook() {
+            async function issueBook() {
+                const btnText = document.getElementById("issueSpinner").previousElementSibling;
+                const spinner = document.getElementById("issueSpinner");
+                btnText.classList.add("hidden");
+                spinner.classList.remove("hidden");
+                await new Promise(resolve => setTimeout(resolve, 500)); // Simulate async
                 const member = document.getElementById("tranMember").value;
                 const book = document.getElementById("tranBook").value;
                 if (member && book) {
@@ -312,82 +447,94 @@
                         transactions.push({ member, book: b.name, status: "issued", date: new Date() });
                         b.status = "issued";
                         refresh();
-                        alert("Book Issued Successfully");
+                        showToast("Book issued successfully!", "success");
                     } else {
-                        alert("Book not available");
+                        showToast("Book not available!", "error");
                     }
+                } else {
+                    showToast("Please select member and book!", "error");
                 }
+                btnText.classList.remove("hidden");
+                spinner.classList.add("hidden");
             }
 
             function returnItem(i) {
-                let t = transactions[i];
-                t.status = "returned";
-                let b = items.find(b => b.name === t.book);
-                if (b) b.status = "available";
-                refresh();
+                if (confirm("Return this item?")) {
+                    let t = transactions[i];
+                    t.status = "returned";
+                    let b = items.find(b => b.name === t.book);
+                    if (b) b.status = "available";
+                    refresh();
+                    showToast("Item returned successfully!", "success");
+                }
+            }
+
+            // USER PROFILE
+            async function updateProfileक़() {
+                const btnText = document.getElementById("profileSpinner").previousElementSibling;
+                const spinner = document.getElementById("profileSpinner");
+                btnText.classList.add("hidden");
+                spinner.classList.remove("hidden");
+                await new Promise(resolve => setTimeout(resolve, 500)); // Simulate async
+                const name = document.getElementById("profileName").value.trim();
+                if (name) {
+                    const user = users.find(u => u.username === currentUser.username);
+                    user.name = name;
+                    if (currentUser.role !== "admin") {
+                        const member = members.find(m => m.username === currentUser.username);
+                        if (member) member.name = name;
+                    }
+                    refresh();
+                    showToast("Profile updated successfully!", "success");
+                } else {
+                    showToast("Name cannot be empty!", "error");
+                }
+                btnText.classList.remove("hidden");
+                spinner.classList.add("hidden");
             }
 
             // PAY FINE
-            function payFine() {
+            async function payFine() {
+                const btnText = document.getElementById("fineSpinner").previousElementSibling;
+                const spinner = document.getElementById("fineSpinner");
+                btnText.classList.add("hidden");
+                spinner.classList.remove("hidden");
+                await new Promise(resolve => setTimeout(resolve, 500)); // Simulate async
                 const amt = document.getElementById("fineAmount").value;
                 if (amt > 0) {
                     document.getElementById("fineMsg").classList.remove("hidden");
                     document.getElementById("fineAmount").value = "";
                     setTimeout(() => document.getElementById("fineMsg").classList.add("hidden"), 2000);
+                    showToast("Fine paid successfully!", "success");
+                } else {
+                    showToast("Please enter a valid amount!", "error");
                 }
+                btnText.classList.remove("hidden");
+                spinner.classList.add("hidden");
             }
 
             // REFRESH DASHBOARD
             function refresh() {
-                // BOOK LIST
-                document.getElementById("bookList").innerHTML = items.map((b, i) => `
-                    <tr>
-                        <td class="border px-2 py-1">${b.name}</td>
-                        <td class="border px-2 py-1">${b.author}</td>
-                        <td class="border px-2 py-1">${b.type}</td>
-                        <td class="border px-2 py-1">${b.status}</td>
-                        <td class="border px-2 py-1">
-                            ${currentUser.role === "admin" && b.status === "available" ? 
-                                `<button onclick="deleteItem(${i})" class="bg-red-500 text-white px-2 rounded hover:bg-red-600">Delete</button>` : ""}
-                        </td>
-                    </tr>
-                `).join("");
-
-                // MEMBER LIST
-                document.getElementById("memberList").innerHTML = members.map((m, i) => `
-                    <tr>
-                        <td class="border px-2 py-1">${m.name}</td>
-                        <td class="border px-2 py-1">${m.username}</td>
-                        <td class="border px-2 py-1">${m.status}</td>
-                        <td class="border px-2 py-1">
-                            ${currentUser.role === "admin" ? 
-                                `<button onclick="cancelMember(${i})" class="bg-red-500 text-white px-2 rounded hover:bg-red-600">Cancel</button>` : ""}
-                        </td>
-                    </tr>
-                `).join("");
-
-                // TRANSACTION LIST
+                renderBooks();
+                renderMembers();
                 document.getElementById("tranList").innerHTML = transactions.map((t, i) => `
                     <tr>
-                        <td class="border px-2 py-1">${t.member}</td>
-                        <td class="border px-2 py-1">${t.book}</td>
-                        <td class="border px-2 py-1">${t.status}</td>
+                        <td class="border px-2 py-1 text-gray-900">${t.member}</td>
+                        <td class="border px-2 py-1 text-gray-900">${t.book}</td sinking
+                        <td class="border px-2 py-1 text-gray-900">${t.status}</td>
+                        <td class="border	Resource
                         <td class="border px-2 py-1">
                             ${t.status === "issued" && currentUser.role === "admin" ? 
-                                `<button onclick="returnItem(${i})" class="bg-green-500 text-white px-2 rounded hover:bg-green-600">Return</button>` : ""}
+                                `<button onclick="returnItem(${i})" class="bg-green-500 text-white px-2 rounded hover:bg-green-600 transition-colors duration-200">Return</button>` : ""}
                         </td>
                     </tr>
                 `).join("");
-
-                // DROPDOWNS
                 document.getElementById("tranMember").innerHTML = members
                     .filter(m => m.status === "active")
                     .map(m => `<option value="${m.username}">${m.name}</option>`).join("");
                 document.getElementById("tranBook").innerHTML = items
                     .filter(b => b.status === "available")
                     .map(b => `<option value="${b.name}">${b.name}</option>`).join("");
-
-                // REPORTS
                 document.getElementById("totalBooks").innerText = items.length;
                 document.getElementById("totalMembers").innerText = members.length;
                 document.getElementById("totalIssued").innerText = transactions.filter(t => t.status === "issued").length;
@@ -398,8 +545,34 @@
                     }
                     return false;
                 }).length;
+                document.getElementById("profileUsername").value = currentUser.username;
+                document.getElementById("profileName").value = currentUser.name || "";
             }
         </script>
     </div>
 </body>
 </html>
+
+
+
+
+
+Username and password for Admin
+username Admin
+password admin123
+
+
+Username and password for user
+username user1
+password user123
+
+
+
+
+
+
+
+
+
+
+
