@@ -13,7 +13,7 @@
         .hero { background: linear-gradient(135deg, #6366f1, #9333ea); color: white; padding: 50px; border-radius: 20px; text-align: center; animation: fadeIn 0.5s ease-in; }
         .hero-user { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; padding: 50px; border-radius: 20px; text-align: center; animation: fadeIn 0.5s ease-in; }
         .card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .card:hover { transform: translateY(-5px); box naturales
+        .card:hover { transform: translateY(-5px); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
         .toast { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; border-radius: 5px; color: white; z-index: 1000; animation: slideIn 0.5s ease, slideOut 0.5s ease 2s forwards; }
         .toast-success { background-color: #10b981; }
         .toast-error { background-color: #ef4444; }
@@ -182,14 +182,63 @@
                 <!-- PAY FINE -->
                 <div id="payFineSection" class="hidden bg-white p-5 rounded-lg shadow-lg mt-4 animate-fadeIn">
                     <h3 class="text-xl font-bold mb-4 text-gray-900">Pay Fine</h3>
-                    <div class="flex gap-2">
-                        <input type="number" placeholder="Enter fine amount" id="fineAmount" class="border p-2 rounded flex-1">
-                        <button onclick="payFine()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors duration-200 flex items-center">
-                            <span>Pay</span>
-                            <span id="fineSpinner" class="spinner hidden ml-2"></span>
-                        </button>
+                    <div class="space-y-4">
+                        <!-- Payment Method Toggle -->
+                        <div class="flex gap-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="paymentMethod" value="online" class="mr-2" checked onclick="togglePaymentForm()">
+                                <span class="text-gray-900">Online Payment</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="paymentMethod" value="offline" class="mr-2" onclick="togglePaymentForm()">
+                                <span class="text-gray-900">Offline Payment</span>
+                            </label>
+                        </div>
+
+                        <!-- Payment Form -->
+                        <div id="paymentForm" class="space-y-4">
+                            <div>
+                                <label class="block text-gray-900">Amount</label>
+                                <input id="fineAmount" type="number" placeholder="Enter fine amount" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- Online Payment Fields -->
+                            <div id="onlinePaymentFields" class="space-y-4">
+                                <div>
+                                    <label class="block text-gray-900">Card Number</label>
+                                    <input id="cardNumber" type="text" placeholder="1234 5678 9012 3456" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div class="flex gap-4">
+                                    <div class="flex-1">
+                                        <label class="block text-gray-900">Expiry Date</label>
+                                        <input id="cardExpiry" type="text" placeholder="MM/YY" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="block text-gray-900">CVV</label>
+                                        <input id="cardCVV" type="text" placeholder="123" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Offline Payment Fields -->
+                            <div id="offlinePaymentFields" class="hidden space-y-4">
+                                <div>
+                                    <label class="block text-gray-900">Receipt Number</label>
+                                    <input id="receiptNumber" type="text" placeholder="Enter receipt number" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-900">Payment Date</label>
+                                    <input id="paymentDate" type="date" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+
+                            <button onclick="payFine()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors duration-200 flex items-center">
+                                <span id="payBtnText">Pay</span>
+                                <span id="fineSpinner" class="spinner hidden ml-2"></span>
+                            </button>
+                            <p id="fineMsg" class="mt-3 text-green-600 hidden">Fine Paid Successfully ✅</p>
+                        </div>
                     </div>
-                    <p id="fineMsg" class="mt-3 text-green-600 hidden">Fine Paid Successfully ✅</p>
                 </div>
             </div>
         </div>
@@ -334,6 +383,7 @@
                 const sections = ["adminHome", "userHome", "bookSection", "memberSection", "transactionSection", "reportSection", "profileSection", "payFineSection"];
                 sections.forEach(s => document.getElementById(s).classList.add("hidden"));
                 document.getElementById(id).classList.remove("hidden");
+                if (id === "payFineSection") togglePaymentForm(); // Reset payment form
             }
 
             // SEARCH BOOKS
@@ -470,7 +520,7 @@
             }
 
             // USER PROFILE
-            async function updateProfileक़() {
+            async function updateProfile() {
                 const btnText = document.getElementById("profileSpinner").previousElementSibling;
                 const spinner = document.getElementById("profileSpinner");
                 btnText.classList.add("hidden");
@@ -493,22 +543,75 @@
                 spinner.classList.add("hidden");
             }
 
+            // TOGGLE PAYMENT FORM
+            function togglePaymentForm() {
+                const method = document.querySelector('input[name="paymentMethod"]:checked').value;
+                document.getElementById("onlinePaymentFields").classList.toggle("hidden", method !== "online");
+                document.getElementById("offlinePaymentFields").classList.toggle("hidden", method !== "offline");
+            }
+
             // PAY FINE
             async function payFine() {
-                const btnText = document.getElementById("fineSpinner").previousElementSibling;
+                const btnText = document.getElementById("payBtnText");
                 const spinner = document.getElementById("fineSpinner");
                 btnText.classList.add("hidden");
                 spinner.classList.remove("hidden");
                 await new Promise(resolve => setTimeout(resolve, 500)); // Simulate async
-                const amt = document.getElementById("fineAmount").value;
-                if (amt > 0) {
+                const amount = document.getElementById("fineAmount").value.trim();
+                const method = document.querySelector('input[name="paymentMethod"]:checked').value;
+                let isValid = true;
+                let errorMessage = "";
+
+                // Validate amount
+                if (!amount || amount <= 0) {
+                    isValid = false;
+                    errorMessage = "Please enter a valid amount!";
+                }
+
+                // Validate online payment fields
+                if (method === "online") {
+                    const cardNumber = document.getElementById("cardNumber").value.trim();
+                    const cardExpiry = document.getElementById("cardExpiry").value.trim();
+                    const cardCVV = document.getElementById("cardCVV").value.trim();
+                    if (!cardNumber || cardNumber.length < 12) {
+                        isValid = false;
+                        errorMessage = "Please enter a valid card number!";
+                    } else if (!cardExpiry || !/^\d{2}\/\d{2}$/.test(cardExpiry)) {
+                        isValid = false;
+                        errorMessage = "Please enter a valid expiry date (MM/YY)!";
+                    } else if (!cardCVV || cardCVV.length < 3) {
+                        isValid = false;
+                        errorMessage = "Please enter a valid CVV!";
+                    }
+                }
+
+                // Validate offline payment fields
+                if (method === "offline") {
+                    const receiptNumber = document.getElementById("receiptNumber").value.trim();
+                    const paymentDate = document.getElementById("paymentDate").value;
+                    if (!receiptNumber) {
+                        isValid = false;
+                        errorMessage = "Please enter a valid receipt number!";
+                    } else if (!paymentDate) {
+                        isValid = false;
+                        errorMessage = "Please select a payment date!";
+                    }
+                }
+
+                if (isValid) {
                     document.getElementById("fineMsg").classList.remove("hidden");
                     document.getElementById("fineAmount").value = "";
+                    document.getElementById("cardNumber").value = "";
+                    document.getElementById("cardExpiry").value = "";
+                    document.getElementById("cardCVV").value = "";
+                    document.getElementById("receiptNumber").value = "";
+                    document.getElementById("paymentDate").value = "";
                     setTimeout(() => document.getElementById("fineMsg").classList.add("hidden"), 2000);
-                    showToast("Fine paid successfully!", "success");
+                    showToast(`Fine paid successfully via ${method}!`, "success");
                 } else {
-                    showToast("Please enter a valid amount!", "error");
+                    showToast(errorMessage, "error");
                 }
+
                 btnText.classList.remove("hidden");
                 spinner.classList.add("hidden");
             }
@@ -520,9 +623,8 @@
                 document.getElementById("tranList").innerHTML = transactions.map((t, i) => `
                     <tr>
                         <td class="border px-2 py-1 text-gray-900">${t.member}</td>
-                        <td class="border px-2 py-1 text-gray-900">${t.book}</td sinking
+                        <td class="border px-2 py-1 text-gray-900">${t.book}</td>
                         <td class="border px-2 py-1 text-gray-900">${t.status}</td>
-                        <td class="border	Resource
                         <td class="border px-2 py-1">
                             ${t.status === "issued" && currentUser.role === "admin" ? 
                                 `<button onclick="returnItem(${i})" class="bg-green-500 text-white px-2 rounded hover:bg-green-600 transition-colors duration-200">Return</button>` : ""}
@@ -557,22 +659,15 @@
 
 
 
-Username and password for Admin
-username Admin
+
+
+
+
+usename and password for admin and user 
+for admin
+username admin
 password admin123
 
-
-Username and password for user
+for user 
 username user1
 password user123
-
-
-
-
-
-
-
-
-
-
-
