@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .hidden { display: none; }
+        .nav-item:hover { background-color: #4f46e5; }
+        .active-link { background-color: #2563eb; }
+        .hero { background: linear-gradient(135deg, #6366f1, #9333ea); color: white; padding: 50px; border-radius: 20px; text-align: center; }
+        .hero-user { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: white; padding: 50px; border-radius: 20px; text-align: center; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- LOGIN PAGE -->
+        <div id="loginPage" class="flex justify-center items-center h-screen">
+            <div class="w-full max-w-md p-8 bg-white rounded shadow-md">
+                <h2 class="text-2xl font-bold mb-6 text-center">Library Login</h2>
+                <input id="username" type="text" placeholder="Username" class="w-full p-2 mb-4 border rounded">
+                <input id="password" type="password" placeholder="Password" class="w-full p-2 mb-4 border rounded">
+                <button onclick="login()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Login</button>
+                <p id="loginError" class="text-red-500 mt-2 text-center hidden">Invalid credentials!</p>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="hidden flex flex-col min-h-screen">
+            <!-- NAVBAR -->
+            <nav class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center flex-wrap">
+                <div class="text-xl font-bold">Library System</div>
+                <div id="navLinks" class="flex gap-2 flex-wrap"></div>
+            </nav>
+
+            <!-- MAIN CONTENT -->
+            <div id="mainContent" class="flex-1 p-5">
+                <!-- ADMIN HOME -->
+                <div id="adminHome" class="hidden hero">
+                    <h1 class="text-3xl font-bold mb-4">Welcome Admin</h1>
+                    <p class="mb-4">Manage books, members, transactions, and generate reports from here.</p>
+                    <div class="flex justify-center gap-4 mb-4">
+                        <button onclick="showSection('bookSection')" class="bg-white text-indigo-600 px-4 py-2 rounded shadow hover:bg-gray-100">Manage Books</button>
+                        <button onclick="showSection('reportSection')" class="bg-white text-indigo-600 px-4 py-2 rounded shadow hover:bg-gray-100">View Reports</button>
+                    </div>
+                    <div class="flex justify-center gap-4 text-2xl">
+                        <i class="fab fa-facebook hover:text-gray-200 cursor-pointer"></i>
+                        <i class="fab fa-twitter hover:text-gray-200 cursor-pointer"></i>
+                        <i class="fab fa-linkedin hover:text-gray-200 cursor-pointer"></i>
+                    </div>
+                </div>
+
+                <!-- USER HOME -->
+                <div id="userHome" class="hidden hero-user">
+                    <h1 class="text-3xl font-bold mb-4">Welcome User</h1>
+                    <p class="mb-4">Search books, issue or return items, and pay fines easily from here.</p>
+                    <div class="flex justify-center gap-4 mb-4">
+                        <button onclick="showSection('bookSection')" class="bg-white text-blue-600 px-4 py-2 rounded shadow hover:bg-gray-100">Search Books</button>
+                        <button onclick="showSection('transactionSection')" class="bg-white text-blue-600 px-4 py-2 rounded shadow hover:bg-gray-100">My Transactions</button>
+                    </div>
+                    <div class="flex justify-center gap-4 text-2xl">
+                        <i class="fab fa-instagram hover:text-gray-200 cursor-pointer"></i>
+                        <i class="fab fa-whatsapp hover:text-gray-200 cursor-pointer"></i>
+                        <i class="fab fa-github hover:text-gray-200 cursor-pointer"></i>
+                    </div>
+                </div>
+
+                <!-- BOOKS -->
+                <div id="bookSection" class="hidden bg-white p-5 rounded shadow mt-4">
+                    <h3 class="text-xl font-bold mb-4">Books & Movies</h3>
+                    <div id="adminBookForm" class="mb-4">
+                        <input id="bookName" type="text" placeholder="Book/Movie Name" class="border p-2 rounded mr-2 mb-2">
+                        <input id="bookAuthor" type="text" placeholder="Author/Director" class="border p-2 rounded mr-2 mb-2">
+                        <select id="bookType" class="border p-2 rounded mr-2 mb-2">
+                            <option value="book">Book</option>
+                            <option value="movie">Movie</option>
+                        </select>
+                        <button onclick="addBook()" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Add</button>
+                    </div>
+                    <table class="table-auto w-full mt-4 border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-200">
+                                <th class="border px-2 py-1">Name</th>
+                                <th class="border px-2 py-1">Author/Director</th>
+                                <th class="border px-2 py-1">Type</th>
+                                <th class="border px-2 py-1">Status</th>
+                                <th class="border px-2 py-1">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookList"></tbody>
+                    </table>
+                </div>
+
+                <!-- MEMBERS -->
+                <div id="memberSection" class="hidden bg-white p-5 rounded shadow mt-4">
+                    <h3 class="text-xl font-bold mb-4">Manage Members</h3>
+                    <div id="adminMemberForm" class="mb-4">
+                        <input id="memberName" type="text" placeholder="Member Name" class="border p-2 rounded mr-2 mb-2">
+                        <input id="memberUsername" type="text" placeholder="Username" class="border p-2 rounded mr-2 mb-2">
+                        <button onclick="addMember()" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Add Member</button>
+                    </div>
+                    <table class="table-auto w-full mt-4 border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-200">
+                                <th class="border px-2 py-1">Name</th>
+                                <th class="border px-2 py-1">Username</th>
+                                <th class="border px-2 py-1">Status</th>
+                                <th class="border px-2 py-1">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="memberList"></tbody>
+                    </table>
+                </div>
+
+                <!-- TRANSACTIONS -->
+                <div id="transactionSection" class="hidden bg-white p-5 rounded shadow mt-4">
+                    <h3 class="text-xl font-bold mb-4">Transactions</h3>
+                    <div id="adminTranForm" class="mb-4 flex gap-2 flex-wrap">
+                        <select id="tranMember" class="border p-2 rounded mr-2 mb-2"></select>
+                        <select id="tranBook" class="border p-2 rounded mr-2 mb-2"></select>
+                        <button onclick="issueBook()" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">Issue</button>
+                    </div>
+                    <table class="table-auto w-full mt-4 border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-200">
+                                <th class="border px-2 py-1">Member</th>
+                                <th class="border px-2 py-1">Item</th>
+                                <th class="border px-2 py-1">Status</th>
+                                <th class="border px-2 py-1">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tranList"></tbody>
+                    </table>
+                </div>
+
+                <!-- REPORTS -->
+                <div id="reportSection" class="hidden bg-white p-5 rounded shadow mt-4">
+                    <h3 class="text-xl font-bold mb-4">Reports</h3>
+                    <ul>
+                        <li>Total Books/Movies: <span id="totalBooks">0</span></li>
+                        <li>Total Members: <span id="totalMembers">0</span></li>
+                        <li>Issued Items: <span id="totalIssued">0</span></li>
+                        <li>Overdue Items: <span id="totalOverdue">0</span></li>
+                    </ul>
+                </div>
+
+                <!-- PAY FINE -->
+                <div id="payFineSection" class="hidden bg-white p-5 rounded shadow mt-4">
+                    <h3 class="text-xl font-bold mb-4">Pay Fine</h3>
+                    <input type="number" placeholder="Enter fine amount" id="fineAmount" class="border p-2 rounded mr-2">
+                    <button onclick="payFine()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Pay</button>
+                    <p id="fineMsg" class="mt-3 text-green-600 hidden">Fine Paid Successfully ✅</p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // USERS
+            let users = [
+                { username: "admin", password: "admin123", role: "admin" },
+                { username: "user1", password: "user123", role: "user" }
+            ];
+            let currentUser = null;
+
+            // DATA
+            let members = [{ name: "John Doe", username: "user1", status: "active" }];
+            let items = [
+                { name: "Harry Potter", author: "J.K. Rowling", type: "book", status: "available" },
+                { name: "Inception", author: "Christopher Nolan", type: "movie", status: "available" },
+                { name: "Lord of the Rings", author: "J.R.R. Tolkien", type: "book", status: "available" },
+                { name: "The Dark Knight", author: "Christopher Nolan", type: "movie", status: "available" },
+                { name: "To Kill a Mockingbird", author: "Harper Lee", type: "book", status: "available" },
+                { name: "Avengers: Endgame", author: "Marvel", type: "movie", status: "available" },
+                { name: "1984", author: "George Orwell", type: "book", status: "available" },
+                { name: "Titanic", author: "James Cameron", type: "movie", status: "available" },
+                { name: "Moby Dick", author: "Herman Melville", type: "book", status: "available" },
+                { name: "Gladiator", author: "Ridley Scott", type: "movie", status: "available" },
+                { name: "Pride and Prejudice", author: "Jane Austen", type: "book", status: "available" },
+                { name: "Avatar", author: "James Cameron", type: "movie", status: "available" },
+                { name: "The Alchemist", author: "Paulo Coelho", type: "book", status: "available" },
+                { name: "Shutter Island", author: "Martin Scorsese", type: "movie", status: "available" },
+                { name: "Hamlet", author: "Shakespeare", type: "book", status: "available" },
+                { name: "The Matrix", author: "Wachowskis", type: "movie", status: "available" },
+                { name: "Sherlock Holmes", author: "Arthur Conan Doyle", type: "book", status: "available" },
+                { name: "Interstellar", author: "Christopher Nolan", type: "movie", status: "available" },
+                { name: "War and Peace", author: "Leo Tolstoy", type: "book", status: "available" },
+                { name: "The Godfather", author: "Francis Ford Coppola", type: "movie", status: "available" }
+            ];
+            let transactions = [];
+
+            // NAVBAR ITEMS
+            const adminNav = [
+                { name: "Home", section: "adminHome" },
+                { name: "Books", section: "bookSection" },
+                { name: "Membership", section: "memberSection" },
+                { name: "Transactions", section: "transactionSection" },
+                { name: "Reports", section: "reportSection" },
+                { name: "Logout", action: "logout" }
+            ];
+            const userNav = [
+                { name: "Home", section: "userHome" },
+                { name: "Books", section: "bookSection" },
+                { name: "Transactions", section: "transactionSection" },
+                { name: "Pay Fine", section: "payFineSection" },
+                { name: "Logout", action: "logout" }
+            ];
+
+            // LOGIN
+            function login() {
+                const u = document.getElementById("username").value.trim();
+                const p = document.getElementById("password").value.trim();
+                let user = users.find(x => x.username === u && x.password === p);
+                if (user) {
+                    currentUser = user;
+                    document.getElementById("loginPage").classList.add("hidden");
+                    document.getElementById("dashboard").classList.remove("hidden");
+                    document.getElementById("loginError").classList.add("hidden");
+                    setupNavbar();
+                    refresh();
+                    showSection(user.role === "admin" ? "adminHome" : "userHome");
+                } else {
+                    document.getElementById("loginError").classList.remove("hidden");
+                }
+            }
+
+            // LOGOUT
+            function logout() {
+                if (confirm("Are you sure to logout?")) {
+                    currentUser = null;
+                    document.getElementById("dashboard").classList.add("hidden");
+                    document.getElementById("loginPage").classList.remove("hidden");
+                    document.getElementById("username").value = "";
+                    document.getElementById("password").value = "";
+                }
+            }
+
+            // NAVBAR SETUP
+            function setupNavbar() {
+                const nav = document.getElementById("navLinks");
+                nav.innerHTML = "";
+                const navItems = currentUser.role === "admin" ? adminNav : userNav;
+                navItems.forEach(item => {
+                    const span = document.createElement("span");
+                    span.className = "nav-item px-3 py-1 rounded cursor-pointer";
+                    span.innerText = item.name;
+                    if (item.action === "logout") span.onclick = logout;
+                    else span.onclick = () => showSection(item.section);
+                    nav.appendChild(span);
+                });
+                // Hide admin-only forms if user
+                document.getElementById("adminBookForm").style.display = currentUser.role === "admin" ? "block" : "none";
+                document.getElementById("adminMemberForm").style.display = currentUser.role === "admin" ? "block" : "none";
+                document.getElementById("adminTranForm").style.display = currentUser.role === "admin" ? "block" : "none";
+            }
+
+            // SHOW SECTION
+            function showSection(id) {
+                const sections = ["adminHome", "userHome", "bookSection", "memberSection", "transactionSection", "reportSection", "payFineSection"];
+                sections.forEach(s => document.getElementById(s).classList.add("hidden"));
+                document.getElementById(id).classList.remove("hidden");
+            }
+
+            // BOOKS
+            function addBook() {
+                const name = document.getElementById("bookName").value.trim();
+                const author = document.getElementById("bookAuthor").value.trim();
+                const type = document.getElementById("bookType").value;
+                if (name && author) {
+                    items.push({ name, author, type, status: "available" });
+                    document.getElementById("bookName").value = "";
+                    document.getElementById("bookAuthor").value = "";
+                    refresh();
+                }
+            }
+
+            function deleteItem(i) {
+                if (confirm("Delete this item?")) {
+                    items.splice(i, 1);
+                    refresh();
+                }
+            }
+
+            // MEMBERS
+            function addMember() {
+                const name = document.getElementById("memberName").value.trim();
+                const username = document.getElementById("memberUsername").value.trim();
+                if (name && username) {
+                    members.push({ name, username, status: "active" });
+                    users.push({ username, password: "12345", role: "user" });
+                    document.getElementById("memberName").value = "";
+                    document.getElementById("memberUsername").value = "";
+                    refresh();
+                }
+            }
+
+            function cancelMember(i) {
+                if (confirm("Cancel membership?")) {
+                    members[i].status = "inactive";
+                    refresh();
+                }
+            }
+
+            // TRANSACTIONS
+            function issueBook() {
+                const member = document.getElementById("tranMember").value;
+                const book = document.getElementById("tranBook").value;
+                if (member && book) {
+                    let b = items.find(x => x.name.toLowerCase() === book.toLowerCase() && x.status === "available");
+                    if (b) {
+                        transactions.push({ member, book: b.name, status: "issued", date: new Date() });
+                        b.status = "issued";
+                        refresh();
+                        alert("Book Issued Successfully");
+                    } else {
+                        alert("Book not available");
+                    }
+                }
+            }
+
+            function returnItem(i) {
+                let t = transactions[i];
+                t.status = "returned";
+                let b = items.find(b => b.name === t.book);
+                if (b) b.status = "available";
+                refresh();
+            }
+
+            // PAY FINE
+            function payFine() {
+                const amt = document.getElementById("fineAmount").value;
+                if (amt > 0) {
+                    document.getElementById("fineMsg").classList.remove("hidden");
+                    document.getElementById("fineAmount").value = "";
+                    setTimeout(() => document.getElementById("fineMsg").classList.add("hidden"), 2000);
+                }
+            }
+
+            // REFRESH DASHBOARD
+            function refresh() {
+                // BOOK LIST
+                document.getElementById("bookList").innerHTML = items.map((b, i) => `
+                    <tr>
+                        <td class="border px-2 py-1">${b.name}</td>
+                        <td class="border px-2 py-1">${b.author}</td>
+                        <td class="border px-2 py-1">${b.type}</td>
+                        <td class="border px-2 py-1">${b.status}</td>
+                        <td class="border px-2 py-1">
+                            ${currentUser.role === "admin" && b.status === "available" ? 
+                                `<button onclick="deleteItem(${i})" class="bg-red-500 text-white px-2 rounded hover:bg-red-600">Delete</button>` : ""}
+                        </td>
+                    </tr>
+                `).join("");
+
+                // MEMBER LIST
+                document.getElementById("memberList").innerHTML = members.map((m, i) => `
+                    <tr>
+                        <td class="border px-2 py-1">${m.name}</td>
+                        <td class="border px-2 py-1">${m.username}</td>
+                        <td class="border px-2 py-1">${m.status}</td>
+                        <td class="border px-2 py-1">
+                            ${currentUser.role === "admin" ? 
+                                `<button onclick="cancelMember(${i})" class="bg-red-500 text-white px-2 rounded hover:bg-red-600">Cancel</button>` : ""}
+                        </td>
+                    </tr>
+                `).join("");
+
+                // TRANSACTION LIST
+                document.getElementById("tranList").innerHTML = transactions.map((t, i) => `
+                    <tr>
+                        <td class="border px-2 py-1">${t.member}</td>
+                        <td class="border px-2 py-1">${t.book}</td>
+                        <td class="border px-2 py-1">${t.status}</td>
+                        <td class="border px-2 py-1">
+                            ${t.status === "issued" && currentUser.role === "admin" ? 
+                                `<button onclick="returnItem(${i})" class="bg-green-500 text-white px-2 rounded hover:bg-green-600">Return</button>` : ""}
+                        </td>
+                    </tr>
+                `).join("");
+
+                // DROPDOWNS
+                document.getElementById("tranMember").innerHTML = members
+                    .filter(m => m.status === "active")
+                    .map(m => `<option value="${m.username}">${m.name}</option>`).join("");
+                document.getElementById("tranBook").innerHTML = items
+                    .filter(b => b.status === "available")
+                    .map(b => `<option value="${b.name}">${b.name}</option>`).join("");
+
+                // REPORTS
+                document.getElementById("totalBooks").innerText = items.length;
+                document.getElementById("totalMembers").innerText = members.length;
+                document.getElementById("totalIssued").innerText = transactions.filter(t => t.status === "issued").length;
+                document.getElementById("totalOverdue").innerText = transactions.filter(t => {
+                    if (t.status === "issued") {
+                        const diff = (new Date() - new Date(t.date)) / (1000 * 60 * 60 * 24);
+                        return diff > 7;
+                    }
+                    return false;
+                }).length;
+            }
+        </script>
+    </div>
+</body>
+</html>
