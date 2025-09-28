@@ -2,7 +2,6 @@
 import cv2
 import mediapipe as mp
 
-# ------------------- HAND TRACKER -------------------
 class Tracker():
     def __init__(self, static_image_mode=False, max_num_hands=1,
                  min_detection_confidence=0.5, min_tracking_confidence=0.5):
@@ -16,7 +15,7 @@ class Tracker():
                                               min_detection_confidence=self.min_detection_confidence,
                                               min_tracking_confidence=self.min_tracking_confidence)
         self.mpDraw = mp.solutions.drawing_utils
-        self.tracking_id = [8, 12]  # Index finger tip & Middle finger tip
+        self.tracking_id = [8, 12]
 
     def hand_landmark(self, img):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -49,7 +48,6 @@ class Tracker():
         return img, dist, x1, y1
 
 
-# ------------------- CALCULATOR BUTTON -------------------
 class Button:
     def __init__(self, x, y, w, h, value,
                  font=cv2.FONT_HERSHEY_COMPLEX,
@@ -92,7 +90,6 @@ class Button:
         return False
 
 
-# ------------------- CALCULATOR UI -------------------
 def draw_calculator(img):
     button_list_values = [['7', '8', '9', '^', '('],
                           ['4', '5', '6', '*', ')'],
@@ -114,7 +111,6 @@ def draw_calculator(img):
     return img, button_list
 
 
-# ------------------- MAIN APP -------------------
 if __name__ == "__main__":
     cap = cv2.VideoCapture(0)
     cap.set(3, 1280)
@@ -131,7 +127,6 @@ if __name__ == "__main__":
         img, button_list = draw_calculator(img)
         img, dist, x1, y1 = tracker.tracking(img)
 
-        # ✅ Button click sirf ek hi bar chalega
         if delay == 0:
             for button in button_list:
                 if button.check_click(img, dist, x1, y1):
@@ -163,19 +158,18 @@ if __name__ == "__main__":
                             equation = ''
                         equation += button.value
 
-                    delay = 1   # ✅ ek button press ke baad lock lag jaye
-                    break       # ek hi button ek frame me execute ho
+                    delay = 1
+                    break
 
-        # ✅ Delay counter
         if delay > 0:
             delay += 1
-            if delay > 15:   # adjust delay (15 ~ 0.5 sec)
+            if delay > 15:
                 delay = 0
 
         cv2.putText(img, equation, (610, 170), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 0, 255), 2)
         cv2.imshow('Hand Calculator', img)
 
-        if cv2.waitKey(1) & 0xFF == 27:  # press ESC to exit
+        if cv2.waitKey(1) & 0xFF == 27:
             break
 
     cap.release()
